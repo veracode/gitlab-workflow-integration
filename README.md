@@ -1,6 +1,6 @@
 # veracode-gitlab-workflow-integration
 
-![Veracode](imgs/vclogo.png)
+![Veracode](imgs/vclogo-light-mode.png)
 
 # Veracode Gitlab Workflow Integration 
 
