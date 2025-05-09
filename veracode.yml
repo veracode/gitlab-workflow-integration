@@ -71,7 +71,7 @@ veracode_sca_scan:
 
 veracode_iac_secrets_scan:
   push:
-    trigger: false
+    trigger: true
     # Please only specify either branches_to_run or branches_to_exclude
     # Entering both will only execute branches_to_run
     # Leaving them both blank means this will never run
@@ -79,7 +79,7 @@ veracode_iac_secrets_scan:
       - '*'
     branches_to_exclude:
   pull_request:
-    trigger: false
+    trigger: true
     action:
       - opened
       - synchronize
