@@ -53,8 +53,10 @@ async function triggerSandboxScan(apiId, apiKey, resApp, artifactFilePath, sourc
         '-createsandbox', 'true',
         '-scanpollinginterval', '30',
         '-', 'include',
-        '-autoscan', 'false',
-        '-scanallnonfataltoplevelmodules', 'false'
+        '-autoscan', 'true',
+        '-scanallnonfataltoplevelmodules', 'true',
+        '-includenewmodules', 'true',
+        '-scantimeout', '6000'
     ];
 
     try {
