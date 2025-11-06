@@ -1,11 +1,11 @@
 const axios = require("axios");
 const { appConfig } = require('../config');
 const privateToken = process.env.PRIVATE_TOKEN;
-const hostName = process.env.CI_SERVER_HOST;
 const projectId = process.env.PROJECT_ID;
-const labelUrl = `https://${hostName}/api/v4/projects/${encodeURIComponent(projectId)}/labels`;
-const issueUrl = `https://${hostName}/api/v4/projects/${encodeURIComponent(projectId)}/issues`;
-const wikkiUrl = `https://${hostName}/api/v4/projects/${encodeURIComponent(projectId)}/wikis`;
+const ciApiV4Url = process.env.CI_API_V4_URL;
+const labelUrl = `${ciApiV4Url}/projects/${encodeURIComponent(projectId)}/labels`;
+const issueUrl = `${ciApiV4Url}/projects/${encodeURIComponent(projectId)}/issues`;
+const wikkiUrl = `${ciApiV4Url}/projects/${encodeURIComponent(projectId)}/wikis`;
 const headers = {
     headers: {
         "PRIVATE-TOKEN": privateToken,  
@@ -107,12 +107,12 @@ async function createComment(projectUrl, mergeRequestId, eventName, commitSha, f
         let reqData;
         let url;
         if(eventName === appConfig().pullRequestEventName){
-            url = `https://${hostName}/api/v4/projects/${projectId}/merge_requests/${mergeRequestId}/notes`
+            url = `${ciApiV4Url}/projects/${projectId}/merge_requests/${mergeRequestId}/notes`
             reqData = {
                 body: formattedContent
             };
         } else {
-            url = `https://${hostName}/api/v4/projects/${projectId}/repository/commits/${commitSha}/comments`
+            url = `${ciApiV4Url}/projects/${projectId}/repository/commits/${commitSha}/comments`
             reqData = {
                 note: formattedContent
             };
