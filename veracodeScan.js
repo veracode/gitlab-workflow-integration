@@ -58,7 +58,7 @@ async function veracodeScan() {
     }
     if (executeIac) {
         console.log(`Executing iac scan on ${projectName} repo for ${sourceBranch} branch`);
-        await iacScan(sourceRepoCloneUrl, sourceBranch, breakBuildOnFinding, breakBuildOnError, userErrorMessage)
+        await iacScan(sourceBranch, breakBuildOnFinding, breakBuildOnError, userErrorMessage)
     }
 }
 veracodeScan();
