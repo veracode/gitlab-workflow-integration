@@ -108,7 +108,7 @@ Auto Package:
     - git -C ${PROJECT_PATH} checkout ${COMMIT_SHA}
     - cd $(basename -s .git ${CLONE_URL})
     - cd ../../
-    - ${CLI_FOLDER}/veracode package --source clonePath/* --output $ARTIFACTS_FOLDER --trust --debug
+    - '[ "$DEBUG" = "true" ] && ${CLI_FOLDER}/veracode package --source clonePath/* --output "$ARTIFACTS_FOLDER" --trust --verbose || ${CLI_FOLDER}/veracode package --source clonePath/* --output "$ARTIFACTS_FOLDER" --trust'
   <<: *artifacts_template
   rules:
     - if: '$EXECUTE_PIPELINE == "true" || $EXECUTE_POLICY == "true" || $EXECUTE_IAC == "true" || $EXECUTE_SANDBOX == "true"'
