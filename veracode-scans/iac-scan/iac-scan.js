@@ -51,6 +51,8 @@ async function iacScan(sourceBranch, breakBuildOnFinding, breakBuildOnError, use
       ],
       {
         reject: false,
+        stderr: 'inherit',
+        stdout: 'inherit',
         env: {
           VERACODE_API_KEY_ID: process.env.VERACODE_API_ID,
           VERACODE_API_KEY_SECRET: process.env.VERACODE_API_KEY
