@@ -4,7 +4,7 @@ const { exitOnFailure, updateErrorMessage, uploadArtifact } = require('../../uti
 const execa = require('execa');
 const displayScanResult = require('../../displayScanResult');
 
-async function iacScan(sourceBranch, breakBuildOnFinding, breakBuildOnError, userErrorMessage) { 
+async function iacScan(sourceBranch, breakBuildOnFinding, breakBuildOnError, userErrorMessage, debug) { 
   const veracodeDir = path.dirname(require.main.filename);
   const veracodeCliPath = path.resolve(veracodeDir, 'veracode-cli');
   const veracodeExecutable = path.join(veracodeCliPath, 'veracode');
@@ -28,7 +28,7 @@ async function iacScan(sourceBranch, breakBuildOnFinding, breakBuildOnError, use
         '--type', 'directory',
         '--format', 'json',
         '--output', 'results.json',
-        '--verbose'
+        ...(debug === "true" ? ['--verbose'] : [])
       ],
       {
         reject: false,
@@ -47,10 +47,12 @@ async function iacScan(sourceBranch, breakBuildOnFinding, breakBuildOnError, use
         '--type', 'directory',
         '--format', 'table',
         '--output', 'results.txt',
-        '--verbose'
+        ...(debug === "true" ? ['--verbose'] : [])
       ],
       {
         reject: false,
+        stderr: 'inherit',
+        stdout: 'inherit',
         env: {
           VERACODE_API_KEY_ID: process.env.VERACODE_API_ID,
           VERACODE_API_KEY_SECRET: process.env.VERACODE_API_KEY
