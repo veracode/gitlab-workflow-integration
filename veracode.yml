@@ -1,5 +1,3 @@
-debug:
-  false
 veracode_static_scan:
   push:
     trigger: true
