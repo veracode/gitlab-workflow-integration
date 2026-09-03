@@ -26,7 +26,7 @@ async function pipelineScanIssue(flawData) {
                     let flaws = flawFiles.get(flawInfo.file);
                     flaws.push(flaw);
                 } else {
-                    // add this file into the map, with the fist of (possible) multiple flaws
+                    // add this file into the map, with the first of (possible) multiple flaws
                     flawFiles.set(flawInfo.file, [flaw])
                 }
             }
