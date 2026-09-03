@@ -15,7 +15,7 @@ async function removeSandboxScan(apiId, apiKey, sourceBranch, applicationName) {
             console.log(`Response from remove sandbox scan from veracode platform for applicationName ${sandboxName} : ${JSON.stringify(response)}`);
             return response;
         }
-        console.log(`remove sandbox scan failed becasue sourceBranch not found`);
+        console.log(`remove sandbox scan failed because sourceBranch not found`);
     } catch (error) {
         console.log(`error while removing sandbox scan: ${error}`);
     }
