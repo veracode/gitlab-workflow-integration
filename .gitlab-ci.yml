@@ -23,7 +23,7 @@ Cli Version Check:
   stage :  Pre Checks
   image : alpine:latest
   before_script:
-    - apk add --no-cache nodejs npm curl git vim
+    - apk add --no-cache nodejs npm curl git
     - |
 
   script: 
