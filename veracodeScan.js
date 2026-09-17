@@ -17,6 +17,7 @@ async function veracodeScan() {
     const breakBuildOnError = process.env.BREAK_BUILD_ON_ERROR || false;
     const sourceProjectId = process.env.PROJECT_ID;
     const policyName = process.env.POLICY_NAME || '';
+    const policyNameIac = process.env.POLICY_NAME_IAC || '';
     const createProfile = true;
     const sourceRepoCloneUrl = process.env.CLONE_URL;
     const scaAgenToken = process.env.VERACODE_AGENT_TOKEN;
@@ -59,7 +60,7 @@ async function veracodeScan() {
     }
     if (executeIac) {
         console.log(`Executing iac scan on ${projectName} repo for ${sourceBranch} branch`);
-        await iacScan(sourceBranch, breakBuildOnFinding, breakBuildOnError, userErrorMessage, debug)
+        await iacScan(sourceBranch, breakBuildOnFinding, breakBuildOnError, userErrorMessage, debug, policyNameIac)
     }
 }
 veracodeScan();
