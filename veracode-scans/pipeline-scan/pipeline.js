@@ -5,11 +5,12 @@ const { appConfig } = require('../../config');
 const { exitOnFailure, updateErrorMessage, uploadArtifact } = require('../../utility/utils');
 const execa = require('execa');
 const { getApplicationByName, getApplicationFindings, isProfileExists, veracodePolicyVerification, validateCredential } = require('../../utility/common');
+const { updateCommitStatus } = require('../../utility/service');
 const pipelineScanIssue = require('../../veracode-issues/pipelineScanIssue');
 const displayScanResult = require('../../displayScanResult');
 const { execSync } = require('child_process');
 
-async function pipelineScan(apiId, apiKey, appProfileName, filterMitigatedFlaws, breakBuildOnFinding, breakBuildOnError, userErrorMessage, policyName, breakBuildOnInvalidPolicy, createIssue, debug) {
+async function pipelineScan(apiId, apiKey, appProfileName, filterMitigatedFlaws, breakBuildOnFinding, breakBuildOnError, userErrorMessage, policyName, breakBuildOnInvalidPolicy, createIssue, debug, commitSha, pipelineName, ciPipelineUrl) {
     const veracodeArtifactsDir = path.join(__dirname, '../../veracode-artifacts');
 
     try {
@@ -17,6 +18,7 @@ async function pipelineScan(apiId, apiKey, appProfileName, filterMitigatedFlaws,
 
         if (!isCredentialValid) {
             await displayScanResult([], "Veracode credentials are invalid or expired.");
+            await updateCommitStatus(commitSha, 'failed', pipelineName, ciPipelineUrl, `${pipelineName} failed`, debug);
             exitOnFailure(breakBuildOnError);
             return;
         }
@@ -24,6 +26,7 @@ async function pipelineScan(apiId, apiKey, appProfileName, filterMitigatedFlaws,
         const invalidPolicy = await veracodePolicyVerification(apiId, apiKey, policyName, breakBuildOnInvalidPolicy);
         if (invalidPolicy) {
             await displayScanResult([], "Invalid Veracode Policy name.");
+            await updateCommitStatus(commitSha, 'failed', pipelineName, ciPipelineUrl, `${pipelineName} failed`, debug);
             exitOnFailure(breakBuildOnInvalidPolicy);
         }
 
@@ -46,9 +49,15 @@ async function pipelineScan(apiId, apiKey, appProfileName, filterMitigatedFlaws,
             const artifactName = failedScan.artifact.replace(/\.[^/.]+$/, '');
             const simplifiedFileName = (resultFileName) =>
                 resultFileName.includes('pipeline') ? 'pipeline.json' : 'filtered_results.json';
+            
 
-            // Loop through each result file in the failed scan
+            // Loop through each result file in the failed scan only if the result file is *filtered_results.json
             for (const resultFileName of failedScan.results) {
+                // Only process files that include "filtered_results.json"
+                if (!resultFileName.includes('filtered_results.json')) {
+                    console.log(`Skipping ${resultFileName} - not a filtered_results.json file`);
+                    continue;
+                }
                 try {
                     // Check if the result file exists
                     if (!fs.existsSync(resultFileName)) {
@@ -84,6 +93,7 @@ async function pipelineScan(apiId, apiKey, appProfileName, filterMitigatedFlaws,
                         ...filteredFindings,
                     ];
                 } catch (error) {
+                    await updateCommitStatus(commitSha, 'failed', pipelineName, ciPipelineUrl, `${pipelineName} failed`, debug);
                     console.error(`Error processing the file ${resultFileName}:`, error);
                 }
             }
@@ -104,7 +114,8 @@ async function pipelineScan(apiId, apiKey, appProfileName, filterMitigatedFlaws,
 
             pipelineResult.result = JSON.stringify(filteredResult, null, 2);
             pipelineResult.status = STATUS.Findings;
-            pipelineResult.message = 'Vulnerability detected in the repository';
+            pipelineResult.message = 'Flaws detected in the repository';
+            await updateCommitStatus(commitSha, 'failed', pipelineName, ciPipelineUrl, `${pipelineName} findings`, debug);
             exitOnFailure(breakBuildOnFinding);
 
             return pipelineResult;
@@ -113,9 +124,11 @@ async function pipelineScan(apiId, apiKey, appProfileName, filterMitigatedFlaws,
             console.log('No pipeline findings, exiting and updating the GitLab check status to success');
             pipelineResult.message = 'No pipeline findings.';
             pipelineResult.status = STATUS.Success;
+            await updateCommitStatus(commitSha, 'success', pipelineName, ciPipelineUrl, `${pipelineName} - no findings`, debug);
             return pipelineResult;
         }
     } catch (error) {
+        await updateCommitStatus(commitSha, 'failed', pipelineName, ciPipelineUrl, `${pipelineName} failed`, debug);
         error = updateErrorMessage(breakBuildOnError, userErrorMessage, error);
         console.error(`Error while processing pipeline scan execution : ${error}`);
         exitOnFailure(breakBuildOnError);
