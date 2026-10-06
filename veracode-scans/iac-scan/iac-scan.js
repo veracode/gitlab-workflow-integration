@@ -3,22 +3,24 @@ const path = require('path');
 const { exitOnFailure, updateErrorMessage, uploadArtifact } = require('../../utility/utils'); 
 const execa = require('execa');
 const displayScanResult = require('../../displayScanResult');
+const { updateCommitStatus } = require('../../utility/service');
 
-async function iacScan(sourceBranch, breakBuildOnFinding, breakBuildOnError, userErrorMessage, debug) { 
+async function iacScan(sourceBranch, breakBuildOnFinding, breakBuildOnError, userErrorMessage, debug, commitSha, pipelineName, ciPipelineUrl) {
   const veracodeDir = path.dirname(require.main.filename);
   const veracodeCliPath = path.resolve(veracodeDir, 'veracode-cli');
   const veracodeExecutable = path.join(veracodeCliPath, 'veracode');
   const veracodeArtifactsDir = path.join(__dirname, '../../veracode-artifacts');
   console.log("Scan Started");
   let sourcePath;
-  
+
   try {
     sourcePath = resolveSourcePath();
   } catch (err) {
+    await updateCommitStatus(commitSha, 'failed', pipelineName, ciPipelineUrl, `${pipelineName} failed`, debug);
     console.error('Failed to resolve source path:', err.message);
     process.exit(1);
   }
-  
+
   try {
     await execa(
       veracodeExecutable,
@@ -61,8 +63,9 @@ async function iacScan(sourceBranch, breakBuildOnFinding, breakBuildOnError, use
     );
 
   } catch (error) {
-    console.log("Error while executing IAC scan :");
-    console.log(error);
+      await updateCommitStatus(commitSha, 'failed', pipelineName, ciPipelineUrl, `${pipelineName} failed`, debug);
+      console.log("Error while executing IAC scan :");
+      console.log(error);
   } 
 
   try {
@@ -73,17 +76,20 @@ async function iacScan(sourceBranch, breakBuildOnFinding, breakBuildOnError, use
     if (jsonOutput?.vulnerabilities?.matches?.length == 0 && !jsonOutput["policy-results"][0].failures) {
       console.log(tableOutput);
       console.log(`Veracode IAC scan executed successfully. No Vulnerabilities found !!`);
+      await updateCommitStatus(commitSha, 'success', pipelineName, ciPipelineUrl, `${pipelineName} no findings`, debug);
     } else {
       await uploadArtifact(veracodeArtifactsDir,"IacScan","IacScan.json",JSON.stringify(resultsJSON, null, 2));
       console.log(`Vulnerability detected in the repository !!`);
       console.error(tableOutput);
       await displayScanResult(resultsJSON);
+      await updateCommitStatus(commitSha, 'failed', pipelineName, ciPipelineUrl, `${pipelineName} findings`, debug);
       exitOnFailure(breakBuildOnError);
     }
   } catch (error) {
     console.log(breakBuildOnError)
     error = updateErrorMessage(breakBuildOnError, userErrorMessage, error.message);
     console.error(`Error occurred during IAC scan: ${error}`);
+      await updateCommitStatus(commitSha, 'failed', pipelineName, ciPipelineUrl, `${pipelineName} failed`, debug);
     exitOnFailure(breakBuildOnError);
   }
 }
