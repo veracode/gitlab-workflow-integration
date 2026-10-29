@@ -18,7 +18,7 @@ async function sandboxScan(apiId, apiKey, sourceBranch, policyName, teams, creat
     try {
         resApp = await getVeracodeApplication(apiId, apiKey, appName, policyName, teams, createprofile, repoUrl);
     } catch (error) {
-        console.log(`Error while retriving application details for ${appName}`, error);
+        console.log(`Error while retrieving application details for ${appName}`, error);
         return;
     }
 

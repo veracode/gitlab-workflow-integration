@@ -32,7 +32,7 @@ const VERACODE_FLAW_LABELS = {
     Unknown: {
         'name': 'VeracodeFlaw: Unknown',
         'color': '#0270D3',
-        'description': 'A Veracode Flaw,Unknown severity',
+        'description': 'A Veracode Flaw, Unknown severity',
     }
 };
 

@@ -166,7 +166,7 @@ async function cancelPipeline(hostName, veracodeProjectId, pipelineId) {
         const response = await axios.post(url, {}, headers);
         return response.data;
     } catch (error) {
-        console.log("Error while fetching pipeline variable", error.response?.data || error.message);
+        console.log("Error while canceling pipeline", error.response?.data || error.message);
         return null;
     }
 }
